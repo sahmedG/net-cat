@@ -1,0 +1,145 @@
+User Sameer joined the chat
+helo
+hello
+join
+join room
+join ahmed
+User ahmed joined the chat
+hello
+join
+leave
+User ahmed joined the chat
+lll
+bye
+1
+ahmed joined the room.
+hello
+Sameer joined the room.
+hello
+hello
+ahmed left the room.
+Sameer left the room.
+User Sameer joined the chat
+User ahmed joined the chat
+User khalid joined the chat
+User ddodo joined the chat
+User yoyo joined the chat
+User lily joined the chat
+User yaya joined the chat
+User jaja joined the chat
+User bobo joined the chat
+User didi joined the chat
+hello
+User didi joined the chat
+User dodo joined the chat
+User dede joined the chat
+User dada joined the chat
+User dwdw joined the chat
+User dcdc joined the chat
+User dxdx joined the chat
+User dzdz joined the chat
+User dgdg joined the chat
+User dkdk joined the chat
+hello
+User ss joined the chat
+User dd joined the chat
+User qq joined the chat
+User zz joined the chat
+User vv joined the chat
+User gg joined the chat
+User hh joined the chat
+User tt joined the chat
+User bb joined the chat
+User mm joined the chat
+User sam joined the chat
+User s joined the chat
+User d joined the chat
+User f joined the chat
+User t joined the chat
+User q joined the chat
+User r joined the chat
+User 1 joined the chat
+User 55 joined the chat
+User rr joined the chat
+User s joined the chat
+User d joined the chat
+User a joined the chat
+User f joined the chat
+User g joined the chat
+User h joined the chat
+User j joined the chat
+User k joined the chat
+User ll joined the chat
+User e joined the chat
+User a joined the chat
+User d joined the chat
+User s joined the chat
+User z joined the chat
+User x joined the chat
+User v joined the chat
+User r joined the chat
+User t joined the chat
+User r joined the chat
+User 4 joined the chat
+hello
+a joined the room.
+1
+s joined the room.
+d joined the room.
+hello
+r joined the room.
+bye
+4 joined the room.
+4 left the room.
+d left the room.
+     /leave
+s
+sss
+r left the room.
+yoyoyo
+/exit
+/exit
+User ddd joined the chat
+User sss joined the chat
+User left the chat.
+User sameer joined the chat
+User ahmed joined the chat
+hello
+bye
+User sameer left the chat.
+User ahmed left the chat.
+User sameer joined the chat
+User ahmed joined the chat
+hello
+hey there
+User moh joined the chat
+yo
+ahmed joined the room.
+im here
+come over
+moh joined the room.
+User Sameer joined the chat
+User amjad joined the chat
+hi
+amjad joined the room.
+Sameer joined the room.
+hi
+Sameer left the room.
+amjad left the room.
+/exit
+User Sameer left the chat.
+User amjad joined the chat
+hi
+hi
+hi
+hi
+User sameer joined the chat
+amjad joined the room.
+hi
+hihi
+hihihi
+sameer joined the room.
+User samer joined the chat
+amjad left the room.
+User amjad left the chat.
+User khalid joined the chat
