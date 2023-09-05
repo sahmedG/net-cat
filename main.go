@@ -22,7 +22,12 @@ func main() {
 	case "server":
 		server.StartServer()
 	case "client":
-		client.StartClient(os.Args[2])
+		if len(os.Args) == 2 {
+			client.StartClient(os.Args[2])
+		} else {
+			fmt.Println("Missing the host name and port!")
+		}
+
 	default:
 		fmt.Println("Invalid mode. Use 'server' or 'client'.")
 	}

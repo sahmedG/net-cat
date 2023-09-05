@@ -138,7 +138,7 @@ _)      \.___.,|     .'
 		Time:    time.Now(),
 	})
 
-	// Handle client messages
+
 	go func() {
 		scanner := bufio.NewScanner(conn)
 		for scanner.Scan() {

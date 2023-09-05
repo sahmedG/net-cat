@@ -143,3 +143,12 @@ User samer joined the chat
 amjad left the room.
 User amjad left the chat.
 User khalid joined the chat
+User sammak joined the chat
+sammak joined the room.
+User same joined the chat
+hi
+same joined the room.
+hi
+same left the room.
+User same left the chat.
+User sammak left the chat.
