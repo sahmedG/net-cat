@@ -41,9 +41,8 @@ var (
 	chatRoomsLock sync.Mutex
 )
 
-func StartServer() {
+func StartServer(port string) {
 	fmt.Println(GetLocalIP())
-	port := "8989"
 
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {

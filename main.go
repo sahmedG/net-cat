@@ -20,7 +20,14 @@ func main() {
 
 	switch mode {
 	case "server":
-		server.StartServer()
+		if len(os.Args) == 3{
+			port := os.Args[2]
+			server.StartServer(port)
+		} else {
+			port := "8989"
+			server.StartServer(port)
+		}
+
 	case "client":
 		if len(os.Args) == 3 {
 			client.StartClient(os.Args[2])
