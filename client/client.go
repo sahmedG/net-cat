@@ -36,7 +36,11 @@ func StartClient(hostname string) {
 
 	for {
 		message, _ := reader.ReadString('\n')
-		if message == "exit\n" {
+		if strings.HasPrefix(message,"/help"){
+			conn.Write([]byte("you can use the following commands within the program: /join -> followed by room number to join a room /leave -> to leave the current room /exit -> to exit the program"))
+		}
+		
+		if strings.HasPrefix(message, "/exit\n") {
 			conn.Write([]byte("User "+name+" left the chat."))
 			break
 		}
