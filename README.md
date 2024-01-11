@@ -1,3 +1,5 @@
+![image](https://logos-world.net/wp-content/uploads/2022/05/MeowChat-Emblem.png)
+
 # Go TCP Chat Server
 
 This is a simple Go TCP chat server that allows multiple clients to connect, chat in various rooms, change usernames, and exit gracefully.
