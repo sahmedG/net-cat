@@ -6,7 +6,9 @@ import (
 	"net"
 	"testing"
 )
+
 var maxConnections = 10
+
 func TestHandleClient_MaxConnections(t *testing.T) {
 	fakeListener, _ := net.Listen("tcp", "127.0.0.1:0")
 	defer fakeListener.Close()

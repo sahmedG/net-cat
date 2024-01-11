@@ -6,43 +6,13 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
-	"sync"
 	"time"
 )
 
-var (
-	MaxConn       = 10
-	ConnCount     = 0
-	ConnCountLock sync.Mutex
-)
-
-type Client struct {
-	Name   string
-	Conn   net.Conn
-	Writer *bufio.Writer
-	RoomID string
-}
-
-type ChatMsg struct {
-	Sender  string
-	Content string
-	RoomID  string
-	Time    time.Time
-}
-
-var (
-	clients     = make(map[*Client]bool)
-	clientsLock sync.Mutex
-)
-
-var (
-	chatRooms     = make(map[string][]ChatMsg)
-	chatRoomsLock sync.Mutex
-)
-
 func StartServer(port string) {
-	fmt.Println(GetLocalIP())
+	// fmt.Println(GetLocalIP())
 
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -59,7 +29,7 @@ func StartServer(port string) {
 			continue
 		}
 		ConnCountLock.Lock()
-		if ConnCount >= MaxConn{
+		if ConnCount >= MaxConn {
 			log.Println("Reached maximum number of connections.")
 			conn.Write([]byte("Can't accept anymore connections at the moment!"))
 			conn.Close()
@@ -79,27 +49,32 @@ func handleClient(conn net.Conn) {
 	client := &Client{
 		Conn:   conn,
 		Writer: bufio.NewWriter(conn),
+		no_get: true,
 	}
 
-	logo := `
-	Welcome to TCP-Chat!
-	_nnnn_
-	dGGGGMMb
-   @p~qp~~qMb
-   M|@||@) M|
-   @,----.JM|
-  JS^\__/  qKL
- dZP        qKRb
-dZP          qKKb
-fZP            SMMb
-HZM            MMMM
-FqM            MMMM
-__| ".        |\dS"qML
-|    ".       | ' \Zq
-_)      \.___.,|     .'
-\____   )MMMMMP|   .'
- 	 '-'       '--`
-	client.Writer.WriteString(logo)
+	logo := []string{
+		"Welcome to TCP-Chat!",
+		"         _nnnn_",
+		"        dGGGGMMb",
+		"       @p~qp~~qMb",
+		"       M|@||@) M|",
+		"       @,----.JM|",
+		"      JS^\\__/  qKL",
+		"     dZP        qKRb",
+		"    dZP          qKKb",
+		"   fZP            SMMb",
+		"   HZM            MMMM",
+		"   FqM            MMMM",
+		" __| \".        |\\dS\"qML",
+		" |    `.       | `' \\Zq",
+		"_)      \\.___.,|     .'",
+		"\\____   )MMMMMP|   .'",
+		"     `-'       `--'",
+	}
+
+	for _, line := range logo {
+		client.Writer.WriteString(line + "\n")
+	}
 	client.Writer.Flush()
 
 	clientsLock.Lock()
@@ -113,7 +88,7 @@ _)      \.___.,|     .'
 		clientsLock.Lock()
 		delete(clients, client)
 		clientsLock.Unlock()
-		broadcast(ChatMsg{
+		Broadcast(ChatMsg{
 			Sender:  "System",
 			Content: fmt.Sprintf("User %s left the chat", client.Name),
 			RoomID:  client.RoomID,
@@ -121,6 +96,7 @@ _)      \.___.,|     .'
 		})
 	}()
 
+loop:
 	client.Writer.WriteString("\nEnter your name: ")
 	client.Writer.Flush()
 	name, err := bufio.NewReader(conn).ReadString('\n')
@@ -129,33 +105,107 @@ _)      \.___.,|     .'
 		return
 	}
 	client.Name = strings.TrimSpace(name)
+	if client.Name == "" {
+		client.Writer.WriteString("\nCan't enter empty name")
+		goto loop
+	}
 
-	broadcast(ChatMsg{
-		Sender:  "System",
-		Content: fmt.Sprintf("User %s joined the chat", client.Name),
-		RoomID:  "",
-		Time:    time.Now(),
-	})
-
+	/* unblock user to get messeges */
+	clientsLock.Lock()
+	client.no_get = false
+	clientsLock.Unlock()
 
 	go func() {
+		Broadcast(ChatMsg{
+			Sender:  "System",
+			Content: fmt.Sprintf("User %s joined the chat", client.Name),
+			RoomID:  "",
+			Time:    time.Now(),
+		})
+	}()
+	go func() {
+		messages := chatRooms[""]
+		for _, message := range messages {
+			if message.Sender == "System" {
+				continue
+			} else {
+				client.Writer.WriteString(formatMessage(message) + "\n")
+			}
+		}
+
+		for i := 0; i < len(messages); i++ {
+			if messages[i].Sender == "System" {
+				continue
+			}
+			if i == len(messages)-1 {
+				client.Writer.WriteString("------chat history-----------\n")
+			}
+		}
+	}()
+	//go pingClient(client, conn)
+	go func() {
+		/*  */
 		scanner := bufio.NewScanner(conn)
+
+		/* Scanner seems to keep running until client disconnects */
 		for scanner.Scan() {
+			//go pingClient(client, conn)
+			/* get the message from the client */
 			message := scanner.Text()
+			/* If the message is not empty */
 			if message != "" {
+				/* let him join a room when he type /join */
 				if strings.HasPrefix(message, "/join") {
+					/* wrong input */
 					args := strings.Fields(message)
 					if len(args) != 2 {
 						client.Writer.WriteString("[System] Invalid usage. Use: /join <room_id>\n")
 						client.Writer.Flush()
 						continue
 					}
+					/* Join room with ID */
 					roomID := args[1]
-					joinRoom(client, roomID)
+					if rune(roomID[0]) >= 49 && rune(roomID[0]) <= 57 {
+						client.JoinRoom(roomID)
+					} else {
+						client.Writer.WriteString("[System] Invalid usage. Use: /join <room_id> ie 1 - 9\n")
+						client.Writer.Flush()
+						continue
+					}
+
+					/* let the client leave the room when he type /leave */
 				} else if message == "/leave" {
-					leaveRoom(client)
+					client.LeaveRoom()
+				} else if strings.HasPrefix(message, "/help") {
+					client.Writer.WriteString("\nProgram usage: /join [room number], /leave, /rn [new user name], /exit\n")
+					client.Writer.Flush()
+					continue
+				} else if strings.HasPrefix(message, "/rn") {
+					args := strings.Fields(message)
+					if !Renaming_Arg_check(args) {
+						client.Writer.WriteString("Usage: /rn [Name]\n")
+						client.Writer.Flush()
+						continue
+					}
+					new_name := args[1]
+					client.ChangeName(new_name)
+				} else if strings.HasPrefix(message, "/exit") {
+					ConnCountLock.Lock()
+					ConnCount--
+					ConnCountLock.Unlock()
+					clientsLock.Lock()
+					delete(clients, client)
+					clientsLock.Unlock()
+					Broadcast(ChatMsg{
+						Sender:  "System",
+						Content: fmt.Sprintf("User %s left the chat", client.Name),
+						RoomID:  "",
+						Time:    time.Now(),
+					})
+					conn.Close()
+					break
 				} else {
-					broadcast(ChatMsg{
+					Broadcast(ChatMsg{
 						Sender:  client.Name,
 						Content: message,
 						RoomID:  client.RoomID,
@@ -164,41 +214,22 @@ _)      \.___.,|     .'
 				}
 			}
 		}
+		client.ClientExit(conn)
 	}()
 
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		s := <-c
+		fmt.Println(s)
+		os.Exit(1)
+	}()
 	clientsLock.Lock()
 	for _, c := range clients {
 		fmt.Printf("c: %v\n", c)
 	}
 	clientsLock.Unlock()
 	select {}
-}
-
-func broadcast(message ChatMsg) {
-	clientsLock.Lock()
-	defer clientsLock.Unlock()
-
-	logFile, err := os.OpenFile("chat_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Println("Error opening log file:", err)
-		return
-	}
-	defer logFile.Close()
-
-	_, err = logFile.WriteString(message.Content + "\n")
-	if err != nil {
-		log.Println("Error writing to log file:", err)
-		return
-	}
-
-	chatRooms[message.RoomID] = append(chatRooms[message.RoomID], message)
-
-	for client := range clients {
-		if client.RoomID == message.RoomID {
-			client.Writer.WriteString(formatMessage(message) + "\n")
-			client.Writer.Flush()
-		}
-	}
 }
 
 func GetLocalIP() net.IP {
@@ -213,36 +244,6 @@ func GetLocalIP() net.IP {
 	return localAddress.IP
 }
 
-func joinRoom(client *Client, roomID string) {
-	leaveRoom(client)
-	client.RoomID = roomID
-	broadcast(ChatMsg{
-		Sender:  "System",
-		Content: client.Name + " joined the room.",
-		RoomID:  roomID,
-		Time:    time.Now(),
-	})
-	chatRoomsLock.Lock()
-	messages := chatRooms[roomID]
-	chatRoomsLock.Unlock()
-	for _, message := range messages {
-		client.Writer.WriteString(formatMessage(message) + "\n")
-		client.Writer.Flush()
-	}
-}
-
 func formatMessage(message ChatMsg) string {
 	return fmt.Sprintf("[%s][%s]: %s", message.Time.Format("2006-01-02 15:04:05"), message.Sender, message.Content)
-}
-
-func leaveRoom(client *Client) {
-	if client.RoomID != "" {
-		broadcast(ChatMsg{
-			Sender:  "System",
-			Content: client.Name + " left the room.",
-			RoomID:  client.RoomID,
-			Time:    time.Now(),
-		})
-		client.RoomID = ""
-	}
 }
