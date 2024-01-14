@@ -60,5 +60,5 @@ If you'd like to contribute to this project, please follow these steps:
 5. Create a pull request on the master repository.
 
 ## Contributers
-[sahmedG](https://github.com/sahmedG) (Sameer Goumaa)
-[MSK17A](https://github.com/MSK17A) (Mohammed AlSammak)
+- [sahmedG](https://github.com/sahmedG) (Sameer Goumaa)
+- [MSK17A](https://github.com/MSK17A) (Mohammed AlSammak)
